@@ -1,0 +1,24 @@
+{
+  "name": "dsh-3d-asset-viewer",
+  "version": "0.1.0",
+  "description": "Universal 3D asset viewer plugin for DeepSeek Harness sidebar.",
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "3d",
+    "viewer",
+    "obj",
+    "mtl",
+    "fbx",
+    "gltf",
+    "glb",
+    "stl"
+  ],
+  "type": "module",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "viewer"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DSH 3D Asset Viewer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="toolbar">
+      <label class="file-picker">
+        <input id="fileInput" type="file" multiple accept=".obj,.mtl,.fbx,.gltf,.glb,.stl,.png,.jpg,.jpeg,.webp" />
+        <span>Choisir un asset</span>
+      </label>
+      <button id="resetViewBtn" type="button">Réinitialiser la vue</button>
+      <button id="wireframeBtn" type="button">Fil de fer</button>
+    </header>
+
+    <main id="viewerShell">
+      <div id="dropZone" aria-hidden="true">Glissez vos fichiers 3D ici</div>
+      <canvas id="viewer" aria-label="Visualiseur 3D"></canvas>
+      <div id="status" role="status">Aucun fichier chargé.</div>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
