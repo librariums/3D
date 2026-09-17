@@ -58,5 +58,6 @@ export const name = PROVIDER_NAME
 export const inject = ['skills']
 
 export function apply(ctx) {
+  if (!ctx?.skills?.registerProvider) throw new TypeError('dsh-3d-asset-viewer requires ctx.skills')
   ctx.skills.registerProvider(() => provider)
 }

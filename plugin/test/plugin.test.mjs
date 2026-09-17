@@ -17,12 +17,14 @@ test('registers and loads the bundled skill', async () => {
   const skill = await provider.get({ locator: name })
   assert.match(skill.content, /^# DSH 3D asset viewer/m)
   await assert.rejects(provider.get({ locator: '../package' }), /unknown skill locator/)
+  assert.throws(() => apply({}), /requires ctx\.skills/)
 })
 
-test('publishes a complete package payload', async () => {
+test('publishes the complete bundle payload', async () => {
   const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url)))
+  assert.equal(packageJson.version, '0.1.2-rc.3')
   assert.deepEqual(packageJson.files, ['index.js', 'cordis.patch.yml', 'skills', 'viewer', 'README.md'])
   assert.equal(packageJson.dsh.bundle.patch, './cordis.patch.yml')
   const patch = await readFile(new URL('../cordis.patch.yml', import.meta.url), 'utf8')
-  assert.match(patch, /name:\s*['"]dsh-3d-asset-viewer['"]|name:\s*['"]dsh-3d-asset-viewer['"]/) 
+  assert.match(patch, /id:\s*dsh-3d-asset-viewer/)
 })

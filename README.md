@@ -2,18 +2,11 @@
 
 Plugin bundle DSH et viewer web local pour DeepSeek Harness `0.1.2-rc.1`.
 
-## Ce qui est réellement fourni
+## État de compatibilité
 
-Le package fournit deux capacités séparées :
-
-1. un provider `ctx.skills` découvert par DSH ;
-2. un viewer HTML autonome dans `plugin/viewer/`.
-
-Le registre des skills ne sert pas automatiquement un fichier HTML et ne crée pas une iframe dans la sidebar. Le viewer doit être servi par HTTP, puis ouvert dans le navigateur ou dans un panneau web autorisé par votre configuration DSH.
+Cette version fournit un **bundle de skill DSH** et un **viewer web autonome**. Le registre des skills ne sert pas automatiquement un fichier HTML et ne crée pas d'iframe dans la sidebar. Le viewer doit être servi par HTTP, puis ouvert dans le navigateur ou dans un panneau web autorisé par la configuration DSH.
 
 ## Installation DSH
-
-Depuis un environnement qui contient `dsh` :
 
 ```bash
 dsh plugin --profile web add "github:librariums/3D#path:/plugin"
@@ -22,7 +15,7 @@ dsh web
 
 Redémarrez `dsh web` après l'installation ou une mise à jour.
 
-## Test local du bundle
+## Validation locale obligatoire
 
 ```bash
 git clone https://github.com/librariums/3D.git
@@ -30,7 +23,7 @@ cd 3D/plugin
 npm test
 ```
 
-Ce test vérifie le provider, le frontmatter de la skill, le locator, le patch Cordis et le payload publié. Il ne remplace pas un test dans le runtime DSH réel.
+Le smoke test vérifie le nom du plugin, le provider `ctx.skills`, le frontmatter et le locator de la skill, le patch Cordis, le payload npm et les loaders du viewer. Il ne remplace pas un test dans un runtime DSH installé.
 
 ## Lancer le viewer
 
@@ -40,34 +33,33 @@ Depuis la racine du dépôt :
 python3 -m http.server 8080 --directory "$PWD/plugin/viewer"
 ```
 
-Ouvrez ensuite `http://127.0.0.1:8080`.
+Ouvrez `http://127.0.0.1:8080`. Ne lancez pas `index.html` avec `file://`.
 
-Avec Node.js :
+## Formats
 
-```bash
-npx --yes serve plugin/viewer
-```
-
-N'ouvrez pas `index.html` avec `file://` : les modules ES et les ressources relatives doivent être servis par HTTP.
-
-## Utilisation
-
-- GLB : format recommandé, généralement autonome ;
+- GLB : recommandé, généralement autonome ;
 - GLTF : sélectionnez aussi les fichiers `.bin` et textures ;
 - OBJ : sélectionnez l'OBJ, le MTL et les textures ensemble ;
 - FBX : import direct ;
-- STL : affichage avec matériau neutre.
+- STL : matériau neutre.
 
-Formats non inclus dans cette RC : USDZ, PLY, 3MF, DAE et X3D. Convertissez-les en GLB.
+USDZ, PLY, 3MF, DAE et X3D ne sont pas inclus dans cette RC : convertissez-les en GLB.
 
-## Dépannage
+## Checklist de validation
 
-- **Skill absente** : vérifiez l'installation dans le profil `web`, puis redémarrez DSH.
-- **Viewer vide** : vérifiez la console du navigateur et utilisez HTTP, pas `file://`.
-- **Textures absentes** : sélectionnez tous les fichiers associés et vérifiez les noms référencés par le MTL/GLTF.
-- **Sidebar impossible** : l'hôte web DSH doit autoriser l'ouverture de `http://127.0.0.1:8080`; sinon utilisez une fenêtre de navigateur séparée.
+- [ ] `npm test` passe dans `plugin/`.
+- [ ] `dsh plugin --profile web add ...` termine sans erreur.
+- [ ] `dsh web` redémarre avec le plugin installé.
+- [ ] la skill `dsh-3d-asset-viewer` apparaît dans le catalogue DSH.
+- [ ] le viewer s'ouvre sur `http://127.0.0.1:8080`.
+- [ ] un GLB se charge et la caméra, rotation, zoom, reset et fil de fer fonctionnent.
+- [ ] OBJ + MTL + texture se charge avec ses matériaux.
+- [ ] GLTF + BIN + texture se charge.
+- [ ] FBX et STL se chargent.
+- [ ] un second chargement libère le premier modèle sans erreur.
+- [ ] l'hôte DSH autorise ou refuse explicitement l'ouverture de la page locale ; si elle est refusée, utiliser un navigateur séparé.
 
-## Références DSH
+## Références
 
 - [Bundles DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/bundle)
 - [Skill subsystem](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/subsystems/skills.md)
