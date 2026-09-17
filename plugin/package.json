@@ -1,18 +1,13 @@
 {
   "name": "dsh-3d-asset-viewer",
-  "version": "0.1.2-rc.1",
-  "description": "Universal 3D asset viewer skill and local web viewer for DeepSeek Harness 0.1.2-rc.1.",
+  "version": "0.1.2-rc.2",
+  "description": "Universal 3D asset viewer skill bundle for DeepSeek Harness 0.1.2-rc.1.",
   "keywords": ["dsh-plugin", "deepseek-harness", "3d", "viewer", "obj", "mtl", "fbx", "gltf", "glb", "stl"],
   "type": "module",
   "main": "index.js",
   "files": ["index.js", "cordis.patch.yml", "skills", "viewer", "README.md"],
-  "scripts": {
-    "test": "node --test test/plugin.test.mjs"
-  },
+  "scripts": { "test": "node --test test/plugin.test.mjs" },
   "license": "MIT",
-  "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    }
-  }
+  "engines": { "node": ">=20" },
+  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } }
 }

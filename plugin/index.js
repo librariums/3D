@@ -18,9 +18,7 @@ function parseSkillFile(skillName, raw) {
     const separator = line.indexOf(':')
     if (separator > 0) fields[line.slice(0, separator).trim()] = line.slice(separator + 1).trim()
   }
-  if (fields.name !== skillName) {
-    throw new Error(`skill "${skillName}": frontmatter name "${fields.name}" does not match its directory`)
-  }
+  if (fields.name !== skillName) throw new Error(`skill "${skillName}": frontmatter name mismatch`)
   if (!fields.description) throw new Error(`skill "${skillName}": description is missing`)
   return { description: fields.description, content: raw.slice(match[0].length) }
 }
@@ -49,7 +47,8 @@ const provider = {
     return { ...shape(skillName, description), rank: BUNDLED_SKILL_RANK, locator: skillName }
   })),
   async get(candidate) {
-    const skillName = candidate.locator
+    const skillName = candidate?.locator
+    if (!SKILL_NAMES.includes(skillName)) throw new Error(`unknown skill locator: ${skillName}`)
     const { description, content } = await loadSkill(skillName)
     return { ...shape(skillName, description), content }
   },
