@@ -1,29 +1,34 @@
 ---
 name: dsh-3d-asset-viewer
-description: Open and inspect local OBJ, MTL, FBX, GLB, GLTF and STL assets with the bundled web viewer.
+description: Open and inspect local OBJ, MTL, FBX, GLB, GLTF and STL files with the bundled 3D viewer.
 ---
 
-# DSH 3D asset viewer
+# 3D Asset Viewer
 
-This skill provides the bundled browser viewer at `viewer/index.html` inside the installed plugin.
+Use this skill when the user wants to inspect a local 3D asset.
 
-## Important integration note
+## Viewer URL
 
-The DSH skill registry loads skills; it does not automatically mount an arbitrary HTML file in the sidebar. To use the viewer, serve `plugin/viewer/` over HTTP and open that URL in the DSH web/sidebar environment supported by the installed DSH version.
-
-For a standalone preview:
+The bundled viewer is a local web application. Start it from the repository root with:
 
 ```bash
-python3 -m http.server 8080 --directory <installed-plugin>/viewer
+python3 -m http.server 8080 --directory plugin/viewer
 ```
 
-Then open `http://localhost:8080`.
+Open `http://127.0.0.1:8080` in a browser or in a DSH web panel that allows local HTTP pages.
 
-Supported formats:
+## Supported assets
 
-- OBJ, with optional MTL and texture files selected together
-- FBX
-- GLB / GLTF, including external resources when selected together
-- STL
+- `.glb`: recommended; usually contains geometry, materials and textures in one file.
+- `.gltf`: select the `.gltf`, `.bin` and referenced texture files together.
+- `.obj`: select the `.obj`, `.mtl` and referenced texture files together.
+- `.fbx`: select the FBX file.
+- `.stl`: select the STL file; it is displayed with a neutral material.
 
-Prefer GLB when one portable file is needed. Never paste binary model data into chat. If the viewer cannot be mounted by the current DSH web host, explain that limitation and provide the local viewer URL instead of claiming that it opened automatically.
+The viewer reads files in the browser. It does not upload them to a remote service.
+
+## Important behavior
+
+Installing this skill makes it available to DSH. It does not automatically create an iframe or HTTP route inside the DSH sidebar. If the DSH host does not permit local pages, open the viewer in a separate browser tab.
+
+Do not paste binary model data into chat. For unsupported formats such as USDZ, PLY, 3MF, DAE or X3D, convert the asset to GLB first.
