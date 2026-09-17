@@ -1,57 +1,63 @@
-/**
- * dsh-3d-asset-viewer
- * Registers the 3D asset viewer skill for DeepSeek Harness.
- */
+import { readFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
 
 const PROVIDER_NAME = 'dsh-3d-asset-viewer'
 const BUNDLED_SKILL_RANK = 600
 const INVOCATION = { modelInvocable: true, userInvocable: true }
+const SKILL_NAMES = ['dsh-3d-asset-viewer']
 
-const skillContent = `# dsh-3d-asset-viewer
+function skillDirUrl(skillName) {
+  return new URL(`./skills/${skillName}/`, import.meta.url)
+}
 
-Open the local 3D asset viewer for inspecting assets in the workspace.
+function parseSkillFile(skillName, raw) {
+  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/)
+  if (!match) throw new Error(`skill "${skillName}": SKILL.md has no frontmatter block`)
+  const fields = {}
+  for (const line of match[1].split(/\r?\n/)) {
+    const separator = line.indexOf(':')
+    if (separator > 0) fields[line.slice(0, separator).trim()] = line.slice(separator + 1).trim()
+  }
+  if (fields.name !== skillName) {
+    throw new Error(`skill "${skillName}": frontmatter name "${fields.name}" does not match its directory`)
+  }
+  if (!fields.description) throw new Error(`skill "${skillName}": description is missing`)
+  return { description: fields.description, content: raw.slice(match[0].length) }
+}
 
-Supported formats:
-- OBJ and MTL, including associated textures
-- FBX
-- GLB and GLTF, including external resources
-- STL
+async function loadSkill(skillName) {
+  const raw = await readFile(new URL('SKILL.md', skillDirUrl(skillName)), 'utf8')
+  return parseSkillFile(skillName, raw)
+}
 
-Instructions:
-- open the viewer page in the DSH web/sidebar context
-- ask the user to select or drag the local asset files into the viewer
-- for OBJ materials, select the OBJ, MTL and texture files together
-- recommend GLB when the user wants one portable file
-- if a format is unsupported, recommend converting it to GLB
-- never paste binary asset contents into chat
-`
+function shape(skillName, description) {
+  return {
+    name: skillName,
+    description,
+    invocation: INVOCATION,
+    provider: PROVIDER_NAME,
+    source: 'bundled',
+    resourceBase: { kind: 'directory', path: fileURLToPath(skillDirUrl(skillName)) },
+    path: fileURLToPath(new URL('SKILL.md', skillDirUrl(skillName))),
+  }
+}
 
-export const name = 'dsh-3d-asset-viewer'
+const provider = {
+  name: PROVIDER_NAME,
+  list: () => Promise.all(SKILL_NAMES.map(async (skillName) => {
+    const { description } = await loadSkill(skillName)
+    return { ...shape(skillName, description), rank: BUNDLED_SKILL_RANK, locator: skillName }
+  })),
+  async get(candidate) {
+    const skillName = candidate.locator
+    const { description, content } = await loadSkill(skillName)
+    return { ...shape(skillName, description), content }
+  },
+}
+
+export const name = PROVIDER_NAME
 export const inject = ['skills']
 
 export function apply(ctx) {
-  const provider = {
-    name: PROVIDER_NAME,
-    list: async () => [{
-      name: PROVIDER_NAME,
-      description: 'Open a local 3D asset viewer for OBJ, MTL, FBX, GLB, GLTF and STL files',
-      invocation: INVOCATION,
-      provider: PROVIDER_NAME,
-      source: 'bundled',
-      rank: BUNDLED_SKILL_RANK,
-      locator: PROVIDER_NAME,
-    }],
-    async get() {
-      return {
-        name: PROVIDER_NAME,
-        description: 'Open a local 3D asset viewer for OBJ, MTL, FBX, GLB, GLTF and STL files',
-        invocation: INVOCATION,
-        provider: PROVIDER_NAME,
-        source: 'bundled',
-        content: skillContent,
-      }
-    },
-  }
-
   ctx.skills.registerProvider(() => provider)
 }

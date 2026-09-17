@@ -1,0 +1,4 @@
+# DSH bundle patch: expose the packaged skill provider to the profile.
+- insert:
+    - id: dsh-3d-asset-viewer
+      name: 'dsh-3d-asset-viewer'
