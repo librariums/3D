@@ -1,118 +1,53 @@
 # 3D Asset Library & DSH Viewer
 
-Plugin et viewer 3D pour DeepSeek Harness (DSH), avec prise en charge des formats OBJ, MTL, FBX, GLB, GLTF et STL.
+Lecteur web local d'assets 3D et bundle de skill pour DeepSeek Harness `0.1.2-rc.1`.
 
-Le dossier `plugin/` contient le plugin DSH. Le dossier `plugin/viewer/` contient le viewer web à afficher dans la sidebar ou à ouvrir localement.
-
-## Fonctionnalités
-
-- Import par bouton ou glisser-déposer
-- OBJ avec MTL et textures associées
-- FBX
-- GLB / GLTF avec textures externes
-- STL
-- Orbit controls : rotation, zoom et déplacement
-- Ajustement automatique de la caméra
-- Grille, éclairage et réinitialisation de la vue
-- Aucun upload vers un serveur : les fichiers sont lus localement dans le navigateur
-
-## Installation du plugin DSH
-
-### Depuis GitHub
-
-Depuis le dossier du projet DeepSeek Harness :
+## Installation
 
 ```bash
 dsh plugin --profile web add "github:librariums/3D#path:/plugin"
 dsh web
 ```
 
-Si votre installation de DSH utilise un profil différent, remplacez `web` par le nom de votre profil.
+Le plugin est volontairement séparé en deux parties : le provider DSH/skill et le viewer web. Installer le plugin rend la skill disponible ; cela ne crée pas automatiquement une route HTTP ni une iframe dans la sidebar.
 
-### Installation locale pour le développement
-
-Clonez le dépôt puis installez le dossier `plugin` :
+## Viewer local
 
 ```bash
-git clone https://github.com/librariums/3D.git
-cd 3D
-dsh plugin --profile web add "file:$(pwd)/plugin"
-dsh web
+python3 -m http.server 8080 --directory /chemin/vers/3D/plugin/viewer
 ```
 
-Après une modification du code, redémarrez le serveur DSH afin de recharger le plugin.
+Ouvre ensuite `http://localhost:8080`.
 
-## Lancer le viewer seul
-
-Le viewer utilise des modules JavaScript ES et doit être servi par un serveur HTTP local. N'ouvrez pas directement `index.html` avec `file://`.
-
-Avec Python :
+## Développement et vérification
 
 ```bash
-cd plugin/viewer
-python3 -m http.server 8080
+cd plugin
+npm test
 ```
 
-Puis ouvrez :
+Le test vérifie le provider et le chargement de `SKILL.md`. Pour vérifier l'interface :
+
+1. lance le serveur HTTP ;
+2. ouvre `http://localhost:8080` ;
+3. charge un GLB de test ;
+4. vérifie la rotation, le zoom, le bouton de vue et le mode fil de fer ;
+5. teste OBJ + MTL + texture puis FBX et STL.
+
+## Formats
+
+OBJ/MTL, FBX, GLB, GLTF et STL. GLB est le format recommandé. USDZ n'est pas supporté dans cette version.
+
+## Architecture DSH
 
 ```text
-http://localhost:8080
+plugin/
+  package.json                 # manifeste et dsh.bundle.patch
+  cordis.patch.yml             # insertion du bundle dans le profil
+  index.js                     # provider ctx.skills
+  skills/.../SKILL.md          # skill avec frontmatter
+  viewer/                      # ressource web autonome
+  test/                        # smoke test Node du contrat local
 ```
 
-Avec Node.js :
-
-```bash
-npx serve plugin/viewer
-```
-
-## Utilisation dans la sidebar DSH
-
-1. Installez le plugin avec la commande ci-dessus.
-2. Lancez `dsh web`.
-3. Demandez à DSH d'ouvrir le viewer 3D ou ouvrez la page `plugin/viewer/index.html` dans le panneau web prévu par votre configuration DSH.
-4. Cliquez sur **Choisir un asset 3D** ou glissez-déposez un fichier dans le viewer.
-5. Pour un OBJ avec matériaux, sélectionnez simultanément le `.obj`, le `.mtl` et les textures associées.
-
-Le plugin enregistre la skill `dsh-3d-asset-viewer`, qui décrit au modèle comment utiliser le viewer. La manière exacte d'ouvrir une page web dans une sidebar peut dépendre de la version de DeepSeek Harness utilisée.
-
-## Formats supportés
-
-| Format | Support | Remarques |
-| --- | --- | --- |
-| OBJ | Oui | Sélectionnez aussi le MTL et les textures pour les matériaux |
-| MTL | Oui | Utilisé avec un OBJ |
-| FBX | Oui | Les fichiers complexes peuvent être lourds dans le navigateur |
-| GLB | Oui | Format recommandé pour partager un asset complet |
-| GLTF | Oui | Sélectionnez aussi les fichiers binaires et textures externes |
-| STL | Oui | Affiché avec un matériau neutre |
-| USDZ | Non | Convertir en GLB avant import |
-
-## Format recommandé
-
-Pour obtenir le meilleur résultat, utilisez **GLB** : la géométrie, les matériaux et les textures sont généralement regroupés dans un seul fichier.
-
-## Dépannage
-
-### Le viewer reste vide
-
-- Lancez-le avec un serveur HTTP, pas avec `file://`.
-- Vérifiez la console du navigateur.
-- Essayez un fichier GLB simple.
-
-### Les textures OBJ ne s'affichent pas
-
-- Sélectionnez le `.obj`, le `.mtl` et les images de texture ensemble.
-- Vérifiez que les noms référencés dans le MTL correspondent aux noms des fichiers.
-- Évitez les chemins absolus dans le fichier MTL.
-
-### Le modèle est trop grand ou invisible
-
-Cliquez sur **Réinitialiser la vue**. Le viewer calcule automatiquement une position de caméra adaptée aux dimensions du modèle.
-
-## Développement
-
-Le plugin ne contient pas de dépendance npm obligatoire. Le viewer charge Three.js et ses loaders depuis `jsDelivr`. Une connexion réseau est donc nécessaire lors du chargement du viewer, sauf si vous remplacez ces imports par une copie locale de Three.js.
-
-## Licence
-
-MIT
+Le modèle de bundle est basé sur les ressources officielles de DeepSeek Harness : [bundles](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/bundle), [skills](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/subsystems/skills.md) et [tutoriel Cordis](https://github.com/deepseek-ai/deepseek-harness/tree/master/docs/cordis-tutorial).
